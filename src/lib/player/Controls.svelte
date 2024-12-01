@@ -1,0 +1,598 @@
+<script>
+	import Slider from './Slider.svelte';
+	import { status, isPlaying, audioPlayer, index, trackList } from './../../stores';
+	import { format } from './utilities.js';
+	import PlayButton from './PlayButton.svelte';
+	import { onMount } from 'svelte';
+
+	import AudioVisualizer from './AudioVisualizer.svelte';
+
+	let duration = $state(0);
+	let currentTime = $state(0);
+	let formattedTime = format(currentTime);
+	let paused = $state(true);
+	let volume = $state(0.5);
+
+	let slider;
+	let rAF = null;
+
+	let repeat = $state(false);
+	let speed = $state(1);
+
+	let trackOn = $state($trackList[$index]);
+
+	let title = $state(trackOn.title);
+	let artist = $state(trackOn.artist);
+	let src = $state(trackOn.file);
+	let img = $state(trackOn.img);
+
+	$effect(() => {
+		title = $trackList[$index].title;
+		artist = $trackList[$index].artist;
+		img = $trackList[$index].img;
+        imageSrc =$trackList[$index].img;
+	});
+
+
+
+	//TEST
+	// Paramètres personnalisés
+	let imageSrc = $state(img);
+	let visualizationMode = 'circular-frequency';
+	let fftSize = 1024;
+	let backgroundColor = '#0000';
+	let themeColor = '#ff4500';
+
+	function whilePlaying() {
+		slider.value = currentTime;
+		currentTime = slider.value;
+		rAF = requestAnimationFrame(whilePlaying);
+	}
+
+	function changeSpeed() {
+		if (speed == 1) {
+			speed = 2;
+		} else {
+			speed = 1;
+		}
+	}
+
+	function loadTrackTest() {
+		/* title = $trackList[$index].title;
+		artist = $trackList[$index].artist;
+		img = $trackList[$index].img; */
+		$audioPlayer.src = $trackList[$index].file;
+		$audioPlayer.load();
+	}
+
+	function loadTrack($index) {
+		title = $trackList[$index].title;
+		artist = $trackList[$index].artist;
+		img = $trackList[$index].img;
+		$audioPlayer.src = $trackList[$index].file;
+		$audioPlayer.load();
+	}
+
+	function playTrack() {
+		$isPlaying = true;
+		requestAnimationFrame(whilePlaying);
+		$audioPlayer.play();
+	}
+
+	function pauseTrack() {
+		$isPlaying = false;
+		cancelAnimationFrame(rAF);
+		$audioPlayer.pause();
+	}
+
+	function movePosition() {
+		time = slider.value;
+		if (!paused) {
+			cancelAnimationFrame(rAF);
+		}
+	}
+
+	function updatePosition() {
+		currentTime = slider.value;
+		if (!paused) {
+			requestAnimationFrame(whilePlaying);
+		}
+	}
+
+	function updateMinus10() {
+		currentTime = currentTime - 10;
+		if (!paused) {
+			requestAnimationFrame(whilePlaying);
+		}
+	}
+
+	function updatePlus10() {
+		currentTime = currentTime + 10;
+		if (!paused) {
+			requestAnimationFrame(whilePlaying);
+		}
+	}
+
+	function previousTrack() {
+		$isPlaying = false;
+		currentTime = 0;
+		if ($index > 0) {
+			$index -= 1;
+		} else {
+			$index = $trackList.length - 1;
+		}
+		//loadTrack($index);
+		playTrack();
+	}
+
+	function nextTrack() {
+		$isPlaying = false;
+		currentTime = 0;
+
+		if (repeat) {
+			//loadTrack($index);
+			playTrack();
+			return;
+		}
+
+		if ($index < $trackList.length - 1) {
+			$index += 1;
+		} else {
+			$index = 0;
+		}
+		loadTrack($index);
+		playTrack();
+	}
+
+	onMount(() => {
+		$audioPlayer.load();
+	});
+
+	// 	on:progress="{() => $status = 'loading'}"
+</script>
+
+<!-- svelte-ignore a11y-media-has-caption -->
+<audio
+	bind:this={$audioPlayer}
+	bind:duration
+	bind:currentTime
+	bind:paused
+	bind:volume
+	bind:playbackRate={speed}
+	on:canplay={() => ($status = 'can play some')}
+	on:canplaythrough={() => ($status = 'can play all')}
+	on:waiting={() => ($status = 'waiting')}
+	on:timeupdate={() => ($status = 'playing')}
+	on:seeking={() => ($status = 'seeking')}
+	on:ended={() => {
+		//$isPlaying = false;
+		currentTime = 0;
+		nextTrack();
+	}}
+	{src}
+></audio>
+
+<div class="flex space-y-2">
+	<div class="pr-2">
+		<svg
+			class="h-6 w-6 text-gray-800 dark:text-white"
+			aria-hidden="true"
+			xmlns="http://www.w3.org/2000/svg"
+			width="24"
+			height="24"
+			fill="currentColor"
+			viewBox="0 0 24 24"
+		>
+			<path
+				d="M15 6.037c0-1.724-1.978-2.665-3.28-1.562L7.638 7.933H6c-1.105 0-2 .91-2 2.034v4.066c0 1.123.895 2.034 2 2.034h1.638l4.082 3.458c1.302 1.104 3.28.162 3.28-1.562V6.037Z"
+			/>
+			<path
+				fill-rule="evenodd"
+				d="M16.786 7.658a.988.988 0 0 1 1.414-.014A6.135 6.135 0 0 1 20 12c0 1.662-.655 3.17-1.715 4.27a.989.989 0 0 1-1.414.014 1.029 1.029 0 0 1-.014-1.437A4.085 4.085 0 0 0 18 12a4.085 4.085 0 0 0-1.2-2.904 1.029 1.029 0 0 1-.014-1.438Z"
+				clip-rule="evenodd"
+			/>
+		</svg>
+	</div>
+
+	<div class="relative w-[200px]">
+		<div
+			class="overflow-hidden rounded-full bg-slate-100 transition-all duration-500 dark:bg-slate-700"
+		>
+			<Slider
+				min={0}
+				max={1}
+				step={0.01}
+				precision={2}
+				formatter={(v) => Math.round(v * 100)}
+				bind:value={volume}
+			/>
+		</div>
+	</div>
+</div>
+
+<div class="relative z-10 mt-6 rounded-xl shadow-xl sm:mt-10">
+	<div
+		class="space-y-6 rounded-t-xl border-b border-slate-100 bg-white p-4 pb-6 transition-all transition-all duration-500 duration-500 sm:space-y-8 sm:p-10 sm:pb-8 lg:space-y-6 lg:p-6 xl:space-y-8 xl:p-10 xl:pb-8 dark:border-slate-500 dark:bg-slate-800"
+	>
+		<div class="flex items-center space-x-4">
+			<img
+				src={img}
+				loading="lazy"
+				decoding="async"
+				alt=""
+				class="flex-none rounded-lg bg-slate-100"
+				width="88"
+				height="88"
+			/>
+			<div class="min-w-0 flex-auto space-y-1 font-semibold">
+				<p class="text-sm leading-6 text-cyan-500 transition-all duration-500 dark:text-cyan-400">
+					<abbr title="Episode">Test</abbr>
+				</p>
+				<h2
+					class="truncate text-sm leading-6 text-slate-500 transition-all duration-500 dark:text-slate-400"
+				>
+					{artist}
+				</h2>
+				<p class="text-lg text-slate-900 transition-all duration-500 dark:text-slate-50">
+					{title}
+				</p>
+			</div>
+		</div>
+		<div class="space-y-2">
+			<div class="relative">
+				<div
+					class="overflow-hidden rounded-full bg-slate-100 transition-all duration-500 dark:bg-slate-700"
+				>
+					<Slider
+						bind:this={slider}
+						min={0}
+						bind:value={currentTime}
+						max={duration}
+						step={0.01}
+						precision={2}
+						formatter={(v) => format(v)}
+						on:input={movePosition}
+						on:change={updatePosition}
+					/>
+				</div>
+			</div>
+			<div class="flex justify-between text-sm font-medium tabular-nums leading-6">
+				<div class="text-cyan-500 transition-all duration-500 dark:text-slate-100">
+					{format(currentTime)}
+				</div>
+				<div class="text-slate-500 transition-all duration-500 dark:text-slate-400">
+					{format(duration)}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div
+		class="flex items-center rounded-b-xl bg-slate-50 text-slate-500 transition-all transition-all duration-500 duration-500 dark:bg-slate-600 dark:text-slate-200"
+	>
+		<div class="flex flex-auto items-center justify-evenly">
+			<!-- <button type="button" aria-label="Add to favorites">
+				<svg width="24" height="24">
+					<path
+						d="M7 6.931C7 5.865 7.853 5 8.905 5h6.19C16.147 5 17 5.865 17 6.931V19l-5-4-5 4V6.931Z"
+						fill="currentColor"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					></path>
+				</svg>
+			</button> -->
+			<button
+				type="button"
+				class="hidden sm:block lg:hidden xl:block"
+				aria-label="Previous"
+				on:click={previousTrack}
+			>
+				<svg width="24" height="24" fill="none">
+					<path
+						d="m10 12 8-6v12l-8-6Z"
+						fill="currentColor"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					></path>
+					<path
+						d="M6 6v12"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					></path>
+				</svg>
+			</button>
+			<button type="button" aria-label="Rewind 10 seconds" on:click={updateMinus10}>
+				<svg width="24" height="24" fill="none">
+					<path
+						d="M6.492 16.95c2.861 2.733 7.5 2.733 10.362 0 2.861-2.734 2.861-7.166 0-9.9-2.862-2.733-7.501-2.733-10.362 0A7.096 7.096 0 0 0 5.5 8.226"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					></path>
+					<path
+						d="M5 5v3.111c0 .491.398.889.889.889H9"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					></path>
+				</svg>
+			</button>
+		</div>
+		<!-- 		<button
+			type="button"
+			class="-my-2 mx-auto flex h-20 w-20 flex-none items-center justify-center rounded-full bg-white text-slate-900 shadow-md ring-1 ring-slate-900/5 transition-all transition-all duration-500 duration-500 dark:bg-slate-100 dark:text-slate-700"
+			aria-label="Pause" 
+		>
+			<svg width="30" height="32" fill="currentColor">
+				<rect x="6" y="4" width="4" height="24" rx="2"></rect>
+				<rect x="20" y="4" width="4" height="24" rx="2"></rect>
+			</svg>
+		</button> --><PlayButton
+			controls
+		/>
+
+		<div class="flex flex-auto items-center justify-evenly">
+			<button type="button" aria-label="Skip 10 seconds" class="" on:click={updatePlus10}>
+				<svg width="24" height="24" fill="none">
+					<path
+						d="M17.509 16.95c-2.862 2.733-7.501 2.733-10.363 0-2.861-2.734-2.861-7.166 0-9.9 2.862-2.733 7.501-2.733 10.363 0 .38.365.711.759.991 1.176"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					></path>
+					<path
+						d="M19 5v3.111c0 .491-.398.889-.889.889H15"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					></path>
+				</svg>
+			</button>
+			<button
+				type="button"
+				class="hidden sm:block lg:hidden xl:block"
+				aria-label="Next"
+				on:click={nextTrack}
+			>
+				<svg width="24" height="24" fill="none">
+					<path
+						d="M14 12 6 6v12l8-6Z"
+						fill="currentColor"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					></path>
+					<path
+						d="M18 6v12"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					></path>
+				</svg>
+			</button>
+
+			<button
+				type="button"
+				class="hidden rounded sm:block lg:hidden xl:block"
+				class:bg-slate-200={repeat}
+				aria-label="Next"
+				on:click={() => (repeat = !repeat)}
+			>
+				<svg
+					class="h-6 w-6 text-gray-800 dark:text-white"
+					aria-hidden="true"
+					xmlns="http://www.w3.org/2000/svg"
+					width="24"
+					height="24"
+					fill="none"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke="currentColor"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="m16 10 3-3m0 0-3-3m3 3H5v3m3 4-3 3m0 0 3 3m-3-3h14v-3"
+					/>
+				</svg>
+			</button>
+
+			<button
+				type="button"
+				class="hidden rounded sm:block lg:hidden xl:block"
+				aria-label="Next"
+				on:click={() => changeSpeed()}
+			>
+				{#if speed == 1}
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="24"
+						height="24"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						class="icon icon-tabler icons-tabler-outline icon-tabler-multiplier-1x"
+						><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 16v-8l-2 2" /><path
+							d="M13 16l4 -4"
+						/><path d="M17 16l-4 -4" /></svg
+					>
+				{:else}
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="24"
+						height="24"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						class="icon icon-tabler icons-tabler-outline icon-tabler-multiplier-2x"
+						><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M14 16l4 -4" /><path
+							d="M18 16l-4 -4"
+						/><path d="M6 10a2 2 0 1 1 4 0c0 .591 -.417 1.318 -.816 1.858l-3.184 4.143l4 0" /></svg
+					>
+				{/if}
+			</button>
+		</div>
+	</div>
+</div>
+
+<AudioVisualizer
+	audioElement={$audioPlayer}
+	{fftSize}
+	{visualizationMode}
+	{backgroundColor}
+    bind:imageSrc={img}
+    imageSize=200
+    width=400
+    height=400
+
+/>
+
+<style>
+	/* audio {
+		display: none
+	}
+	
+	div {
+		display: grid;
+		grid-auto-flow: row;
+	}
+	
+	button {
+		margin: 0;
+		padding: 0;
+		width: 4rem;
+		height: 2rem;
+		border-radius: 4px;
+		border: 1px solid #bbb;
+		background: #fcfcfc;
+	}
+	
+	p {
+		margin: 0;
+		padding: 0;
+		line-height: 1;
+		user-select: none;
+	}
+	
+	strong {
+		margin: 0;
+		padding: 0;
+		font-size: 14px;
+		line-height: 1;
+	}
+	
+	span {
+		display: inline-grid;
+		margin: 0;
+		padding: 0.25rem 0.75rem;
+		width: 2.5rem;
+		background: #f3f3f3;
+		border: 1px solid #bbb;
+		border-radius: 6px;
+		place-items: center;
+		font-size: 14px;
+	}
+	
+	.box {
+		margin: 0;
+		padding: 1rem;
+		padding-top: 1.5rem;
+		background: #eee;
+		grid-auto-flow: row;
+		row-gap: 1rem;
+		align-items: center;
+		border: 1px solid #bbb;
+		border-radius: 10px;
+	}
+	
+	.info {
+		margin: 0;
+		padding: 0;
+		width: 100%;
+		grid-template-columns: 1fr;
+		grid-template-rows: 2;
+		justify-items: start;
+		row-gap: 0.75rem;
+	}
+	
+		.title, .artist {
+		display: grid;
+		grid-auto-flow: column;
+		grid-template-columns: 4rem 1fr;
+		row-gap: 1rem;
+		margin: 0;
+		padding: 0;
+	}
+	
+	.title {
+		grid-row: 1 / 2;
+	}
+	
+	.artist {
+		grid-row: 2 / 3;
+	}
+
+	.buttons {
+		grid-template-columns: 4rem 4rem 4rem 4rem 1fr;
+		place-items: center;
+		column-gap: 1rem
+	}
+	
+	.volume-slider {
+		margin: 0;
+		padding: 0;
+		width: 100%;
+	}
+	
+	.progress {
+		grid-template-columns: 6rem 1fr 6rem;
+		place-items: center;
+	}
+	
+	.time {
+		justify-self: start;
+	}
+	
+	.duration {
+		justify-self: end;
+	}
+	
+	.progress-slider {
+		width: 100%;
+	}
+	
+	.prev, .next {
+		border-radius: 2rem;
+	}
+	 */
+	/* 	.debugger {
+		padding: 1rem;
+		place-items: center;
+		column-gap: 1rem;
+		border: 1px solid #bbb;
+		border-radius: 8px;
+		background: #ddd;
+		grid-template-columns: 4rem 1fr 4rem 1fr;
+		justify-items: start;
+		align-items: center;
+		row-gap: 0.5rem;
+	} */
+</style>
