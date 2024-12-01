@@ -1,11 +1,13 @@
-
 <script lang="ts">
-
 	import Controls from '$lib/player/Controls.svelte';
 	import Track from '$lib/player/Track.svelte';
 	import PlayerMusic from '$lib/player/PlayerMusic.svelte';
-	import coatch from '$lib/music/coach ping pong.mp3'
-	import frigi from '$lib/images/frigi.png'
+
+	import coatch from '$lib/music/coach ping pong.mp3';
+	import frigi from '$lib/images/frigi.png';
+
+	import avengerMusic from '$lib/music/AVENGERS.mp3';
+	import avenger from '$lib/images/avenger.png';
 </script>
 
 <svelte:head>
@@ -14,33 +16,14 @@
 </svelte:head>
 
 <section>
-	<Controls/>
+	<Controls />
 </section>
 
+<div class="app">
+	<Track img={frigi} title="Coach ping pong" artist="en attente" file={coatch} />
 
-
-
-<div class='app'>
-			
-	<Track
-		img='{frigi}'
-		title='Coach ping pong'
-		artist='en attente'
-		file= '{coatch}'
-	/>
+	<Track img={avenger} title="Avengers" artist="en attente" file={avengerMusic} />
 	
-	<Track
-		title='Mars, the Bringer of War'
-		artist='Gustav Holst'
-		file='https://sveltejs.github.io/assets/music/holst.mp3'
-	/>
-	
-	<Track
-		title='The Blue Danube Waltz'
-		artist='Johann Strauss'
-		file='https://sveltejs.github.io/assets/music/strauss.mp3'
-	/>
-
 </div>
 
 <style>
