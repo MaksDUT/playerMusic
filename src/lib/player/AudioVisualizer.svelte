@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
 	import ColorThief from 'colorthief'; // Bibliothèque pour extraire les couleurs dominantes
+	import { status, isPlaying, audioPlayer, index, trackList } from './../../stores';
 
 	/*     export let audioElement: HTMLAudioElement | null = null;
     export let fftSize = 2048;
@@ -14,9 +15,9 @@
 		visualizationMode = 'circular-frequency',
 		imageSrc = $bindable(null),
 		backgroundColor = '#000',
-		imageSize = 200,
-		width = 200,
-		height = 200
+		imageSize = "200",
+		width = "200",
+		height = "200"
 	} = $props();
 
 	let canvasElement: HTMLCanvasElement = $state();
@@ -40,12 +41,17 @@
 		}
 	});
 
+	$effect(() => {
+		if ($isPlaying) {
+			initAudioContext();
+		}
+	});
+
 	onMount(() => {
 		img = new Image();
 		img.src = imageSrc;
 		img.onload = () => extractThemeColors();
 		isMount = true;
-		initAudioContext();
 	});
 
 	// Extraire les couleurs dominantes avec ColorThief
@@ -62,16 +68,18 @@
 			console.error('Aucun élément audio fourni au composant AudioVisualizer.');
 			return;
 		}
+		if (audioContext == null) {
+			audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
 
-		audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-		const source = audioContext.createMediaElementSource(audioElement);
-		analyser = audioContext.createAnalyser();
-		analyser.fftSize = fftSize;
+			const source = audioContext.createMediaElementSource(audioElement);
+			analyser = audioContext.createAnalyser();
+			analyser.fftSize = fftSize;
 
-		source.connect(analyser);
-		analyser.connect(audioContext.destination);
+			source.connect(analyser);
+			analyser.connect(audioContext.destination);
 
-		drawVisualization();
+			drawVisualization();
+		}
 	}
 
 	function drawVisualization() {
@@ -98,11 +106,10 @@
 					break;
 				case 'circular-frequency':
 					drawCircularFrequency(ctx, canvas);
+					if (imageSrc) {
+						drawCenterImage(ctx, canvas);
+					}
 					break;
-			}
-
-			if (imageSrc) {
-				drawCenterImage(ctx, canvas);
 			}
 
 			animationFrameId = requestAnimationFrame(draw);
@@ -117,7 +124,7 @@
 		analyser!.getByteTimeDomainData(dataArray);
 
 		ctx.lineWidth = 2;
-		ctx.strokeStyle = themeColors[0] || '#ff4500';
+		//ctx.strokeStyle = themeColors[0] || '#ff4500';
 
 		ctx.beginPath();
 		const sliceWidth = (canvas.width * 1.0) / bufferLength;
@@ -140,6 +147,20 @@
 		ctx.stroke();
 	}
 
+	// Fonction pour déterminer la couleur en fonction de la hauteur
+	function getColor(value, maxValue) {
+		const range = maxValue / 5; // Diviser la plage en 5 parties
+		if (value < range)
+			return themeColors[0]; // Première plage
+		else if (value < range * 2)
+			return themeColors[1]; // Deuxième plage
+		else if (value < range * 3)
+			return themeColors[2]; // Troisième plage
+		else if (value < range * 4)
+			return themeColors[3]; // Quatrième plage
+		else return themeColors[4]; // Cinquième plage
+	}
+
 	function drawFrequencyBars(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
 		const bufferLength = analyser!.frequencyBinCount;
 		const dataArray = new Uint8Array(bufferLength);
@@ -151,8 +172,8 @@
 		for (let i = 0; i < bufferLength; i++) {
 			const barHeight = dataArray[i];
 			const colorIndex = Math.floor((i / bufferLength) * themeColors.length);
-			ctx.fillStyle = themeColors[colorIndex] || themeColors[0];
-
+			//ctx.fillStyle = themeColors[colorIndex] || themeColors[0];
+			ctx.fillStyle = getColor(dataArray[i], 255);
 			ctx.fillRect(x, canvas.height - barHeight / 2, barWidth, barHeight / 2);
 			x += barWidth + 1;
 		}
