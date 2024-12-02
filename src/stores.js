@@ -6,6 +6,9 @@ import frigi from '$lib/images/frigi.png'
 import avengerMusic from '$lib/music/AVENGERS.mp3'
 import avenger from '$lib/images/avenger.png'
 
+
+
+
 export const audioPlayer = writable();
 export const status = writable('default');
 export const isPlaying = writable(false);
@@ -20,7 +23,7 @@ export const trackList = writable([
 	},
 	{
 		img: avenger,
-        title: 'Avenger',
+        title: 'Avengers',
 		artist: 'Test',
 		file: avengerMusic
 	},
