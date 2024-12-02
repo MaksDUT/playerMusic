@@ -6,15 +6,11 @@
 	import { status, isPlaying, audioPlayer, index, trackList } from './../../stores';
 	import AudioVisualizer from '$lib/player/AudioVisualizer.svelte';
 
-	import coatch from '$lib/music/coach ping pong.mp3';
-	import frigi from '$lib/images/frigi.png';
-
-	import avengerMusic from '$lib/music/AVENGERS.mp3';
-	import avenger from '$lib/images/avenger.png';
-
 	import arcane from '$lib/images/arcane3.png';
 
 	import { Listgroup, ListgroupItem, Avatar } from 'flowbite-svelte';
+
+	import { onMount } from 'svelte';
 
 	let trackOn = $state($trackList[$index]);
 
@@ -32,6 +28,15 @@
 	let fftSize = 1024;
 	let backgroundColor = '#0000';
 	let themeColor = '#ff4500';
+
+	let isMount = $state(false);
+
+	onMount(()=> {
+		isMount = true;
+	})
+
+
+
 </script>
 
 <svelte:head>
@@ -47,14 +52,21 @@
 	<div class="absolute inset-0 bg-black opacity-50"></div>
 
 	<div class="relative z-10 flex h-full flex-col items-center justify-end">
-		<Listgroup active class="w-96">
-			<ListgroupItem class="gap-2 text-base font-semibold">
-				<Track img={frigi} title="Coach ping pong" artist="en attente" file={coatch}  isNew/>
-			</ListgroupItem>
-			<ListgroupItem class="gap-2 text-base font-semibold">
-				<Track img={avenger} title="Avengers" artist="en attente" file={avengerMusic} isNew />
-			</ListgroupItem>
-		</Listgroup>
+		{#if isMount}
+			<Listgroup active class="w-96 transition-all duration-500">
+				{#each $trackList as track}
+					<ListgroupItem class="gap-2 text-base font-semibold">
+						<Track
+							img={track.img}
+							title={track.title}
+							artist={track.artist}
+							file={track.file}
+							isNew
+						></Track>
+					</ListgroupItem>
+				{/each}
+			</Listgroup>
+		{/if}
 
 		<section>
 			<Controls />
