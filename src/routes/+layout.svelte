@@ -7,10 +7,8 @@
 
 <div class="app">
 	<Header />
-
-	<main>
-		{@render children()}
-	</main>
+	
+	{@render children()}
 
 
 </div>

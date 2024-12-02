@@ -4,13 +4,11 @@
 	let { children } = $props();
 </script>
 
-<div class="app">
-	
-	<main>
-		{@render children()}
-	</main>
 
-</div>
+	
+{@render children()}
+
+
 
 <style>
 	.app {
