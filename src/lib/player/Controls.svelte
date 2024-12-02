@@ -5,6 +5,8 @@
 	import PlayButton from './PlayButton.svelte';
 	import { onMount } from 'svelte';
 
+	import { Button, Dropdown, DropdownItem } from 'flowbite-svelte';
+
 	import AudioVisualizer from './AudioVisualizer.svelte';
 
 	let duration = $state(0);
@@ -30,15 +32,13 @@
 		title = $trackList[$index].title;
 		artist = $trackList[$index].artist;
 		img = $trackList[$index].img;
-        imageSrc =$trackList[$index].img;
+		imageSrc = $trackList[$index].img;
 	});
-
-
 
 	//TEST
 	// Paramètres personnalisés
 	let imageSrc = $state(img);
-	let visualizationMode = 'circular-frequency';
+	let visualizationMode = 'frequency';
 	let fftSize = 1024;
 	let backgroundColor = '#0000';
 	let themeColor = '#ff4500';
@@ -49,12 +49,12 @@
 		rAF = requestAnimationFrame(whilePlaying);
 	}
 
-	function changeSpeed() {
-		if (speed == 1) {
-			speed = 2;
-		} else {
-			speed = 1;
+	function changeSpeed(v) {
+		if (speed == v) {
+			return;
 		}
+		speed = v;
+		
 	}
 
 	function loadTrackTest() {
@@ -172,70 +172,28 @@
 	{src}
 ></audio>
 
-<div class="flex space-y-2">
-	<div class="pr-2">
-		<svg
-			class="h-6 w-6 text-gray-800 dark:text-white"
-			aria-hidden="true"
-			xmlns="http://www.w3.org/2000/svg"
-			width="24"
-			height="24"
-			fill="currentColor"
-			viewBox="0 0 24 24"
-		>
-			<path
-				d="M15 6.037c0-1.724-1.978-2.665-3.28-1.562L7.638 7.933H6c-1.105 0-2 .91-2 2.034v4.066c0 1.123.895 2.034 2 2.034h1.638l4.082 3.458c1.302 1.104 3.28.162 3.28-1.562V6.037Z"
-			/>
-			<path
-				fill-rule="evenodd"
-				d="M16.786 7.658a.988.988 0 0 1 1.414-.014A6.135 6.135 0 0 1 20 12c0 1.662-.655 3.17-1.715 4.27a.989.989 0 0 1-1.414.014 1.029 1.029 0 0 1-.014-1.437A4.085 4.085 0 0 0 18 12a4.085 4.085 0 0 0-1.2-2.904 1.029 1.029 0 0 1-.014-1.438Z"
-				clip-rule="evenodd"
-			/>
-		</svg>
-	</div>
 
-	<div class="relative w-[200px]">
-		<div
-			class="overflow-hidden rounded-full bg-slate-100 transition-all duration-500 dark:bg-slate-700"
-		>
-			<Slider
-				min={0}
-				max={1}
-				step={0.01}
-				precision={2}
-				formatter={(v) => Math.round(v * 100)}
-				bind:value={volume}
-			/>
-		</div>
-	</div>
-</div>
-
-<div class="relative z-10 mt-6 rounded-xl shadow-xl sm:mt-10">
+<div class="relative z-10 mt-6 rounded-xl shadow-xl sm:mt-5">
 	<div
-		class="space-y-6 rounded-t-xl border-b border-slate-100 bg-white p-4 pb-6 transition-all transition-all duration-500 duration-500 sm:space-y-8 sm:p-10 sm:pb-8 lg:space-y-6 lg:p-6 xl:space-y-8 xl:p-10 xl:pb-8 dark:border-slate-500 dark:bg-slate-800"
+		class="min-w-[400px] space-y-6 rounded-t-xl border-b border-slate-100 bg-slate-700 bg-opacity-90 p-4 pb-6 transition-all transition-all duration-500 duration-500 sm:space-y-8 sm:p-10 sm:pb-8 lg:space-y-6 lg:p-6 xl:space-y-8 xl:p-10 xl:pb-8 dark:border-slate-500 dark:bg-slate-800"
 	>
-		<div class="flex items-center space-x-4">
+		<div class="flex items-center space-x-4 object-fill">
 			<img
 				src={img}
 				loading="lazy"
 				decoding="async"
 				alt=""
-				class="flex-none rounded-lg bg-slate-100"
-				width="88"
-				height="88"
+				class="w-32 flex-none rounded-lg bg-slate-100 bg-cover"
 			/>
 			<div class="min-w-0 flex-auto space-y-1 font-semibold">
-				<p class="text-sm leading-6 text-cyan-500 transition-all duration-500 dark:text-cyan-400">
-					<abbr title="Episode">Test</abbr>
+				<p class="text-lg text-slate-100 transition-all duration-500 dark:text-slate-50">
+					{title}
 				</p>
 				<h2
-					class="truncate text-sm leading-6 text-slate-500 transition-all duration-500 dark:text-slate-400"
+					class="truncate text-sm leading-6 text-slate-300 transition-all duration-500 dark:text-slate-400"
 				>
 					{artist}
 				</h2>
-				<p class="text-lg text-slate-900 transition-all duration-500 dark:text-slate-50">
-					{title}
-				</p>
 			</div>
 		</div>
 		<div class="space-y-2">
@@ -257,10 +215,10 @@
 				</div>
 			</div>
 			<div class="flex justify-between text-sm font-medium tabular-nums leading-6">
-				<div class="text-cyan-500 transition-all duration-500 dark:text-slate-100">
+				<div class="text-cyan-400 transition-all duration-500 dark:text-slate-100">
 					{format(currentTime)}
 				</div>
-				<div class="text-slate-500 transition-all duration-500 dark:text-slate-400">
+				<div class="text-slate-200 transition-all duration-500 dark:text-slate-400">
 					{format(duration)}
 				</div>
 			</div>
@@ -271,21 +229,34 @@
 		class="flex items-center rounded-b-xl bg-slate-50 text-slate-500 transition-all transition-all duration-500 duration-500 dark:bg-slate-600 dark:text-slate-200"
 	>
 		<div class="flex flex-auto items-center justify-evenly">
-			<!-- <button type="button" aria-label="Add to favorites">
-				<svg width="24" height="24">
-					<path
-						d="M7 6.931C7 5.865 7.853 5 8.905 5h6.19C16.147 5 17 5.865 17 6.931V19l-5-4-5 4V6.931Z"
-						fill="currentColor"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-					></path>
-				</svg>
-			</button> -->
 			<button
 				type="button"
-				class="hidden sm:block lg:hidden xl:block"
+				class="hidden rounded sm:block lg:hidden xl:block"
+				class:bg-slate-200={repeat}
+				aria-label="Next"
+				on:click={() => (repeat = !repeat)}
+			>
+				<svg
+					class="h-6 w-6 text-gray-800 dark:text-white"
+					aria-hidden="true"
+					xmlns="http://www.w3.org/2000/svg"
+					width="24"
+					height="24"
+					fill="none"
+					viewBox="0 0 24 24"
+				>
+					<path
+						stroke="currentColor"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="m16 10 3-3m0 0-3-3m3 3H5v3m3 4-3 3m0 0 3 3m-3-3h14v-3"
+					/>
+				</svg>
+			</button>
+			<button
+				type="button"
+				class="sm:block xl:block"
 				aria-label="Previous"
 				on:click={previousTrack}
 			>
@@ -307,7 +278,12 @@
 					></path>
 				</svg>
 			</button>
-			<button type="button" aria-label="Rewind 10 seconds" on:click={updateMinus10}>
+			<button
+				type="button"
+				aria-label="Rewind 10 seconds"
+				class="hidden sm:block lg:hidden xl:block"
+				on:click={updateMinus10}
+			>
 				<svg width="24" height="24" fill="none">
 					<path
 						d="M6.492 16.95c2.861 2.733 7.5 2.733 10.362 0 2.861-2.734 2.861-7.166 0-9.9-2.862-2.733-7.501-2.733-10.362 0A7.096 7.096 0 0 0 5.5 8.226"
@@ -340,7 +316,12 @@
 		/>
 
 		<div class="flex flex-auto items-center justify-evenly">
-			<button type="button" aria-label="Skip 10 seconds" class="" on:click={updatePlus10}>
+			<button
+				type="button"
+				aria-label="Skip 10 seconds"
+				class="hidden sm:block lg:hidden xl:block"
+				on:click={updatePlus10}
+			>
 				<svg width="24" height="24" fill="none">
 					<path
 						d="M17.509 16.95c-2.862 2.733-7.501 2.733-10.363 0-2.861-2.734-2.861-7.166 0-9.9 2.862-2.733 7.501-2.733 10.363 0 .38.365.711.759.991 1.176"
@@ -358,12 +339,7 @@
 					></path>
 				</svg>
 			</button>
-			<button
-				type="button"
-				class="hidden sm:block lg:hidden xl:block"
-				aria-label="Next"
-				on:click={nextTrack}
-			>
+			<button type="button" class=" xl:block" aria-label="Next" on:click={nextTrack}>
 				<svg width="24" height="24" fill="none">
 					<path
 						d="M14 12 6 6v12l8-6Z"
@@ -383,87 +359,94 @@
 				</svg>
 			</button>
 
+			<Dropdown class="m-4" placement="top" triggeredBy="#top-dd">
+				<DropdownItem on:click={() => changeSpeed(0.5)}>
+					<div class="mb-1 font-medium">x0.5</div>
+				</DropdownItem>
+				<DropdownItem on:click={() => changeSpeed(0.75)}>
+					<div class="mb-1 font-medium">x0.75</div>
+				</DropdownItem>
+				<DropdownItem on:click={() => changeSpeed(1)}>
+					<div class="mb-1 font-medium">x1</div>
+				</DropdownItem>
+				<DropdownItem on:click={() => changeSpeed(1.25)}>
+					<div class="mb-1 font-medium">x1.25</div>
+				</DropdownItem>
+				<DropdownItem on:click={() => changeSpeed(1.5)}><div class="mb-1 font-medium">x1.5</div></DropdownItem>
+				<DropdownItem on:click={() => changeSpeed(2)}><div class="mb-1 font-medium">x 2</div></DropdownItem>
+			</Dropdown>
+
 			<button
+				id="top-dd"
 				type="button"
 				class="hidden rounded sm:block lg:hidden xl:block"
-				class:bg-slate-200={repeat}
 				aria-label="Next"
-				on:click={() => (repeat = !repeat)}
 			>
+				x{speed}
+			</button>
+		</div>
+	</div>
+
+	<div
+	class="flex w-2/3 m-auto items-center rounded-b-xl bg-slate-50 text-slate-500 transition-all transition-all duration-500 duration-500 dark:bg-slate-600 dark:text-slate-200"
+>
+	<div class="flex flex-auto items-center justify-evenly">
+		<div class="flex space-y-2">
+			<div class="pr-2">
 				<svg
-					class="h-6 w-6 text-gray-800 dark:text-white"
+					class="h-6 w-6 text-slate-500 dark:text-white"
 					aria-hidden="true"
 					xmlns="http://www.w3.org/2000/svg"
 					width="24"
 					height="24"
-					fill="none"
+					fill="currentColor"
 					viewBox="0 0 24 24"
 				>
 					<path
-						stroke="currentColor"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="m16 10 3-3m0 0-3-3m3 3H5v3m3 4-3 3m0 0 3 3m-3-3h14v-3"
+						d="M15 6.037c0-1.724-1.978-2.665-3.28-1.562L7.638 7.933H6c-1.105 0-2 .91-2 2.034v4.066c0 1.123.895 2.034 2 2.034h1.638l4.082 3.458c1.302 1.104 3.28.162 3.28-1.562V6.037Z"
+					/>
+					<path
+						fill-rule="evenodd"
+						d="M16.786 7.658a.988.988 0 0 1 1.414-.014A6.135 6.135 0 0 1 20 12c0 1.662-.655 3.17-1.715 4.27a.989.989 0 0 1-1.414.014 1.029 1.029 0 0 1-.014-1.437A4.085 4.085 0 0 0 18 12a4.085 4.085 0 0 0-1.2-2.904 1.029 1.029 0 0 1-.014-1.438Z"
+						clip-rule="evenodd"
 					/>
 				</svg>
-			</button>
-
-			<button
-				type="button"
-				class="hidden rounded sm:block lg:hidden xl:block"
-				aria-label="Next"
-				on:click={() => changeSpeed()}
-			>
-				{#if speed == 1}
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="24"
-						height="24"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						class="icon icon-tabler icons-tabler-outline icon-tabler-multiplier-1x"
-						><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M9 16v-8l-2 2" /><path
-							d="M13 16l4 -4"
-						/><path d="M17 16l-4 -4" /></svg
-					>
-				{:else}
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="24"
-						height="24"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						class="icon icon-tabler icons-tabler-outline icon-tabler-multiplier-2x"
-						><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M14 16l4 -4" /><path
-							d="M18 16l-4 -4"
-						/><path d="M6 10a2 2 0 1 1 4 0c0 .591 -.417 1.318 -.816 1.858l-3.184 4.143l4 0" /></svg
-					>
-				{/if}
-			</button>
+			</div>
+		
+			<div class="relative w-[200px]">
+				<div
+					class="overflow-hidden rounded-full bg-slate-100 transition-all duration-500 dark:bg-slate-700"
+				>
+					<Slider
+						min={0}
+						max={1}
+						step={0.01}
+						precision={2}
+						formatter={(v) => Math.round(v * 100)}
+						bind:value={volume}
+					/>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>
 
-<AudioVisualizer
+
+</div>
+
+<div></div>
+
+<!-- <AudioVisualizer
 	audioElement={$audioPlayer}
 	{fftSize}
 	{visualizationMode}
 	{backgroundColor}
     bind:imageSrc={img}
     imageSize=200
-    width=400
-    height=400
+    width=900
+    height=300
 
-/>
+/> -->
 
 <style>
 	/* audio {
