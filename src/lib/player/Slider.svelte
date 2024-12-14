@@ -412,7 +412,7 @@
           style="{vertical ? 'top' : 'left'}: {percentageValue}%;"
           aria-valuenow={percentageValue}
           aria-valuemin={min}
-      aria-valuemax={max}
+          aria-valuemax={max}
           aria-valuetext="{prefix}{handleFormatter(percentageValue)}{suffix}"
           aria-orientation={vertical ? 'vertical' : 'horizontal'}
       >
