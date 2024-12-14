@@ -9,7 +9,6 @@ import avenger from '$lib/images/avenger.png'
 
 import la_team_music from '$lib/music/LA TEAM.mp3'
 import la_team from '$lib/images/lateam.png'
-import la_team_lyric from '$lib/lyrics/lyricpotato.lrc';
 
 
 import la_guerre_music from '$lib/music/la guerre.mp3'
