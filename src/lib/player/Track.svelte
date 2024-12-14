@@ -20,10 +20,10 @@
 </script>
 
 <div
-	class="flex w-full items-center rounded-t-xl bg-white p-3 pb-3 transition-all transition-all duration-500 duration-500 sm:p-2 sm:pb-2 lg:p-2 xl:p-2 xl:pb-2 dark:border-slate-500 dark:bg-slate-800"
+	class="flex w-full items-center  bg-white p-3 pb-3 transition-all transition-all duration-500 duration-500 sm:p-2 sm:pb-2 lg:p-2 xl:p-2 xl:pb-2 dark:border-slate-500 dark:bg-slate-800  dark:border-slate-500 dark:border-b"
 	class:playing={title === $trackList[$index].title}
 >
-	<div class="play-button">
+	<div class="play-button m-1">
 		<PlayButton track {title} {artist} {file} {img} />
 	</div>
 
@@ -31,16 +31,11 @@
 		<Avatar src={img} rounded />
 	</div>
 
-	<div class="m-2 flex flex-col content-center items-start w-full">
+	<div class="m-2 flex w-full flex-col content-center items-start dark:text-white">
 		<div class="font-semibold">{title}</div>
 		<div class="font-medium">{artist}</div>
 	</div>
 
-	{#if isNew}
-		<div class="flex justify-end w-full">
-			<Badge {color}>New</Badge>
-		</div>
-	{/if}
 </div>
 
 <style>

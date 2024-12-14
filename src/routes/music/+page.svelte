@@ -73,6 +73,7 @@
 		</section>
 
 		<div class="app overflow-hidden">
+			{#if isMount}
 			<AudioVisualizer
 				audioElement={$audioPlayer}
 				{fftSize}
@@ -83,6 +84,7 @@
 				width="2000"
 				height="200"
 			/>
+			{/if}
 		</div>
 	</div>
 </div>

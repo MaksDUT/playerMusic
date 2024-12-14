@@ -42,41 +42,35 @@
 		loadTrack($index);
 		playTrack();
 	}
+
+	function cond(){
+		if(controls) return true;
+		return title === $trackList[$index].title
+	}
+
 </script>
 
-{#if controls}
-	{#if $isPlaying === false}
-		<button class="play-button controls" on:click={playTrack}>
-			<PlayIcon size=2 />
+
+	{#if !cond() }
+		<button class="play-button" class:controls={controls} class:track={track}  on:click={addAndPlayTrack}>
+			<PlayIcon size={(controls) ? 1.5 : 1 } />
 		</button>
-	{:else if $isPlaying === true && ($status === 'waiting' || $status === 'loading' || $status === 'can play some' || $status === 'can play all')}
-		<button class="play-button controls" on:click={pauseTrack}>
-			<LoadingIcon />
+	{:else if cond() && $isPlaying === true && ($status === 'waiting' || $status === 'loading' || $status === 'can play some' || $status === 'can play all')}
+		<button class="play-button" class:controls={controls} class:track={track} class:playing={$isPlaying}  on:click={pauseTrack}>
+			<LoadingIcon size={(controls) ? 1.5 : 1 } />
 		</button>
-	{:else if $isPlaying === true}
-		<button class="play-button controls" on:click={pauseTrack}>
-			<PauseIcon />
+
+	{:else if cond() && $isPlaying === true}
+		<button class="play-button " class:controls={controls} class:playing={$isPlaying} class:track={track} on:click={pauseTrack}>
+			<PauseIcon size={(controls) ? 1.5 : 1 } />
 		</button>
-	{/if}
-{:else if track}
-	{#if title !== $trackList[$index].title}
-		<button class="play-button track" on:click={addAndPlayTrack}>
-			<PlayIcon size={1.5} />
-		</button>
-	{:else if title === $trackList[$index].title && $isPlaying === true && ($status === 'loading' || $status === 'can play some' || $status === 'can play all' || $status === 'waiting')}
-		<button class="play-button track playing" on:click={pauseTrack}>
-			<LoadingIcon size={1.5} />
-		</button>
-	{:else if title === $trackList[$index].title && $isPlaying === true}
-		<button class="play-button track playing" on:click={pauseTrack}>
-			<PauseIcon size={1.5} />
-		</button>
-	{:else if title === $trackList[$index].title && $isPlaying === false}
-		<button class="play-button track playing" on:click={playTrack}>
-			<PlayIcon size={1.5} />
+	
+	{:else if cond() && $isPlaying === false}
+		<button class="play-button" class:controls={controls} class:track={track} class:playing={$isPlaying}  on:click={playTrack}>
+			<PlayIcon size={(controls) ? 1.5 : 1 } />
 		</button>
 	{/if}
-{/if}
+
 
 <style>
 	.play-button {
@@ -96,9 +90,8 @@
     }
 
 	.controls {
-		width: 4rem;
-		height: 4rem;
-		
+		width: 2.25rem;
+		height: 2.25rem;	
 	}
 
 </style>
