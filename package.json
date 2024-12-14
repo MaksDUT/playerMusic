@@ -34,9 +34,11 @@
 		"vite": "^5.0.3"
 	},
 	"dependencies": {
+		"@sanity/client": "^6.24.1",
 		"@tailwindcss/forms": "^0.5.9",
 		"@tailwindcss/typography": "^0.5.15",
 		"colorthief": "^2.6.0",
-		"flowbite-svelte": "^0.47.4"
+		"flowbite-svelte": "^0.47.4",
+		"liricle": "^4.2.0"
 	}
 }
