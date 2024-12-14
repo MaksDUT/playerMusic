@@ -17,7 +17,9 @@ const client = createClient({
 
 
 export async function load({ params }) {
-    const data = await client.fetch(`*[_type=="music"]{title, artist,"imageURL": image.asset->url,"musicURL": music.asset->url}`);
+    const data = await client.fetch(`*[_type=="music"]{title, artist,"imageURL": image.asset->url,"musicURL": music.asset->url,
+  "lyricURL": lyric.asset->url
+  }`);
   
     if (data) {
         data.forEach( music => {
@@ -27,6 +29,7 @@ export async function load({ params }) {
                     title: music.title ,
                     artist: music.artist,
                     file: music.musicURL,
+                    lyric: music.lyricURL,
                 },
             )
         });
